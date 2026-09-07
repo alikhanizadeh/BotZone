@@ -36,7 +36,7 @@ open class OrderViewModel(private val repository: OrderRepository) : ViewModel()
                 title = it.name,
                 subtitle = "Qty: ${it.quantity}",
                 price = it.price.toString(),
-                image = it.imageUrl,
+                imagePath = it.imageUrl,
                 category = "cart"
             )
         }

@@ -28,6 +28,9 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
 
+    implementation("org.xerial:sqlite-jdbc:3.43.0.0")
+
+
 
     // JWT
     implementation("com.auth0:java-jwt:4.4.0")

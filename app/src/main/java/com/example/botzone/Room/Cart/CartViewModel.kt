@@ -46,7 +46,7 @@ class CartViewModel : ViewModel() {
                     id = product.id,
                     name = product.title,
                     price = product.price.filter { c -> c.isDigit() || c == '.' }.toDoubleOrNull() ?: 0.0,
-                    imageUrl = product.image,
+                    imageUrl = product.imagePath,
                     quantity = 1
                 )
             )

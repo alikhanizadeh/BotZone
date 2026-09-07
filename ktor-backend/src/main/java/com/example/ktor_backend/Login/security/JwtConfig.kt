@@ -1,9 +1,13 @@
-package com.example.ktor_backend.security
+package com.example.ktor_backend.Login.security
 
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import java.util.*
+
+// 1.ساخت JWT Token بعد از Login موفق
+// 2.اعتبارسنجی Token‌های دریافتی
+
 
 object JwtConfig {
     private const val SECRET = "your-secret-key-change-this-in-production"

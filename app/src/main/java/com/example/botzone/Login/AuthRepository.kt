@@ -3,9 +3,11 @@ package com.example.botzone.Login
 import com.example.botzone.Login.Models.LoginRequest
 
 
+//واسط بین ViewModel و API
+
 class AuthRepository {
 
-    private val api = RetrofitInstance.api
+    private val api = RetrofitInstance.authApi
 
     suspend fun login(request: LoginRequest) =
         api.login(request)

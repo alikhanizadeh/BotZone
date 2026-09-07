@@ -20,8 +20,10 @@ data class AuthResponse(
     val username: String?
 )
 
-interface AuthApi {
 
+//تعریف اینکه چه درخواست‌هایی به سرور فرستاده میشه
+
+interface AuthApi {
     @POST("/auth/login")
     suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
 

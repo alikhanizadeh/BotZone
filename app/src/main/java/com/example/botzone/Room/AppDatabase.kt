@@ -17,7 +17,7 @@ import com.example.botzone.Room.Registration.RegistrationEntity
 import com.example.botzone.Room.Store.ProductDao
 import com.example.botzone.Room.Store.ProductEntity
 
-@Database(entities = [ProductEntity::class, OrderEntity::class, ConferenceEntity::class, RegistrationEntity::class,PaymentEntity ::class], version = 7, exportSchema = false)
+@Database(entities = [ProductEntity::class,OrderEntity::class, ConferenceEntity::class, RegistrationEntity::class,PaymentEntity ::class], version = 9, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun productDao(): ProductDao

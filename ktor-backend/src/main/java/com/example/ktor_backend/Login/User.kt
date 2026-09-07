@@ -1,7 +1,10 @@
-package com.example.ktor_backend.models
+package com.example.ktor_backend.Login
 
 
 import kotlinx.serialization.Serializable
+
+
+// ساختار دستابیس
 
 @Serializable
 data class User(
@@ -13,6 +16,8 @@ data class User(
     val lastLogin: String? = null,
     val isActive: Boolean = true
 )
+
+//
 
 @Serializable
 data class RegisterRequest(

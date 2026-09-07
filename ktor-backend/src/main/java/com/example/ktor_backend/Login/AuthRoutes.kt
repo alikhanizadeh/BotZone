@@ -1,16 +1,17 @@
-package com.example.ktor_backend.routes
+package com.example.ktor_backend.Login
 
 
-import com.example.ktor_backend.database.UserRepository
-import com.example.ktor_backend.models.AuthResponse
-import com.example.ktor_backend.models.LoginRequest
-import com.example.ktor_backend.models.RegisterRequest
-import com.example.ktor_backend.security.JwtConfig
-import com.example.ktor_backend.security.PasswordHasher
+import com.example.ktor_backend.Login.security.JwtConfig
+import com.example.ktor_backend.Login.security.PasswordHasher
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+
+
+//دریافت درخواست HTTP از کلاینت
+//پردازش Login/Register
+//برگرداندن Response
 
 fun Route.authRoutes() {
     val userRepo = UserRepository()
@@ -35,7 +36,8 @@ fun Route.authRoutes() {
                 call.respond(HttpStatusCode.Conflict, AuthResponse(
                     success = false,
                     message = "این نام کاربری قبلاً استفاده شده"
-                ))
+                )
+                )
                 return@post
             }
 
@@ -56,12 +58,14 @@ fun Route.authRoutes() {
                     message = "ثبت‌نام موفقیت‌آمیز بود",
                     token = token,
                     username = user.username
-                ))
+                )
+                )
             } else {
                 call.respond(HttpStatusCode.InternalServerError, AuthResponse(
                     success = false,
                     message = "خطا در ثبت‌نام"
-                ))
+                )
+                )
             }
         }
 
@@ -75,7 +79,8 @@ fun Route.authRoutes() {
                 call.respond(HttpStatusCode.Unauthorized, AuthResponse(
                     success = false,
                     message = "نام کاربری یا رمز عبور اشتباه است"
-                ))
+                )
+                )
                 return@post
             }
 
@@ -84,7 +89,8 @@ fun Route.authRoutes() {
                 call.respond(HttpStatusCode.Forbidden, AuthResponse(
                     success = false,
                     message = "این حساب روی دستگاه دیگری ثبت شده است"
-                ))
+                )
+                )
                 return@post
             }
 
@@ -93,7 +99,8 @@ fun Route.authRoutes() {
                 call.respond(HttpStatusCode.Unauthorized, AuthResponse(
                     success = false,
                     message = "نام کاربری یا رمز عبور اشتباه است"
-                ))
+                )
+                )
                 return@post
             }
 
@@ -106,7 +113,8 @@ fun Route.authRoutes() {
                 message = "ورود موفقیت‌آمیز",
                 token = token,
                 username = user.username
-            ))
+            )
+            )
         }
     }
 }

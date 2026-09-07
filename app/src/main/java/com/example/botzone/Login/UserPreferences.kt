@@ -2,48 +2,43 @@ package com.example.botzone.Login
 
 
 import android.content.Context
-import android.util.Log
-import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
-import kotlinx.coroutines.flow.first
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
-
-val Context.userDataStore by preferencesDataStore("user_prefs")
+//ذخیره Token در DataStore (حافظه محلی)
 
 class UserPreferences(private val context: Context) {
+
+    private val Context.dataStore by preferencesDataStore("user_prefs")
+
     companion object {
-        val USERNAME = stringPreferencesKey("username")
-        val PASSWORD = stringPreferencesKey("password")
-        val IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
+        val KEY_TOKEN = stringPreferencesKey("jwt_token")
+        val KEY_USERNAME = stringPreferencesKey("username")
+        val KEY_LOGGED_IN = booleanPreferencesKey("logged_in")
+        val KEY_DEVICE = stringPreferencesKey("device_id")
     }
 
-    suspend fun saveUser(username: String, password: String) {
-        context.userDataStore.edit { prefs ->
-            prefs[USERNAME] = username
-            prefs[PASSWORD] = password
+    val token: Flow<String?> = context.dataStore.data.map { it[KEY_TOKEN] }
+    val username: Flow<String?> = context.dataStore.data.map { it[KEY_USERNAME] }
+    val isLoggedIn: Flow<Boolean> = context.dataStore.data.map { it[KEY_LOGGED_IN] ?: false }
+    val deviceId: Flow<String?> = context.dataStore.data.map { it[KEY_DEVICE] }
 
+    suspend fun saveLogin(token: String, username: String, deviceId: String) {
+        context.dataStore.edit {
+            it[KEY_TOKEN] = token
+            it[KEY_USERNAME] = username
+            it[KEY_DEVICE] = deviceId
+            it[KEY_LOGGED_IN] = true
         }
     }
 
-    suspend fun getUser(): Pair<String?, String?> {
-        val prefs = context.userDataStore.data.first()
-        Log.e("USERNAME", prefs[USERNAME].toString())
-        Log.e("PASSWORD", prefs[PASSWORD].toString())
-        return prefs[USERNAME] to prefs[PASSWORD]
-    }
-
-    suspend fun isLoggedIn(): Boolean {
-        val prefs = context.userDataStore.data.first()
-        return prefs[IS_LOGGED_IN] ?: false
-    }
-
-    suspend fun setLoggedIn(value: Boolean) {
-        context.userDataStore.edit { prefs ->
-            prefs[IS_LOGGED_IN] = value
+    suspend fun logout() {
+        context.dataStore.edit {
+            it.clear()
         }
-    }
-
-    suspend fun clearUser() {
-        context.userDataStore.edit { it.clear() }
     }
 }

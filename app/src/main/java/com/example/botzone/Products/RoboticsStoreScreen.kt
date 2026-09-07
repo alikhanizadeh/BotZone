@@ -1,7 +1,9 @@
 package com.example.botzone.Products
 
 import android.app.Activity
+import android.app.Application
 import android.content.Context
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
@@ -9,6 +11,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.Image
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -42,19 +45,27 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import coil3.compose.AsyncImage
+import com.example.botzone.AppNavigation
 import com.example.botzone.BottomNavBar.BottomNavBar
+import com.example.botzone.BottomNavBar.CustomBottomNavigation
 import com.example.botzone.PortraitCaptureActivity
 import com.example.botzone.R
 import com.example.botzone.Room.Cart.CartViewModel
 import com.example.botzone.Room.Store.StoreViewModel
+import com.example.botzone.Room.Store.StoreViewModelFactory
+import com.example.botzone.component.Product
+import com.example.botzone.data.testProducts
+import com.example.botzone.ui.theme.BotZoneTheme
 import com.google.zxing.integration.android.IntentIntegrator
 import kotlinx.coroutines.launch
 import kotlin.math.cos
@@ -65,141 +76,237 @@ import kotlin.math.sin
 @Composable
 fun RoboticsStoreScreen(
     navController: NavController,
-    viewModel: StoreViewModel = viewModel(),
     cartViewModel: CartViewModel
 ) {
-    // collect products from ViewModel (ProductEntity)
-    val productsEntities by viewModel.allProducts.collectAsState()
-    val context = LocalContext.current
-    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-    var showFullSearch by remember { mutableStateOf(false) }
-    // ensure initial data exists
-    LaunchedEffect(Unit) {
-        viewModel.insertInitialProducts()
+
+    val currentRoute =
+        navController.currentBackStackEntryAsState()
+            .value
+            ?.destination
+            ?.route
+
+    var showFullSearch by remember {
+        mutableStateOf(false)
     }
 
 
+    // داده‌های تستی را بر اساس category دسته‌بندی می‌کنیم
+    val grouped: Map<String, List<Pair<Product, Int>>> = remember {
 
-    // group by category to display category sections (we still keep original UI structure)
-    val grouped: Map<String, List<Pair<Product, Int>>> = remember(productsEntities) {
-        // produce Map<category, List<(Product, id)>>
-        productsEntities.groupBy { it.category }
+        testProducts
+            .groupBy { it.category }
             .mapValues { entry ->
-                entry.value.map { pe ->
+
+                entry.value.map { product ->
+
                     Pair(
-                        Product(pe.title, pe.subtitle, pe.price, pe.image),
-                        pe.id // keep id for navigation
+                        Product(
+                            title = product.title,
+                            subtitle = product.subtitle,
+                            price = product.price,
+                            imagePath = product.imagePath
+                        ),
+                        product.id
                     )
                 }
             }
     }
 
+
     Scaffold(
+
         topBar = {
+
             if (!showFullSearch) {
+
                 RoboticsTopBar(
                     navController = navController,
                     cartViewModel = cartViewModel,
-                    onSearchClick = { showFullSearch = true }
+                    onSearchClick = {
+                        showFullSearch = true
+                    }
                 )
             }
         },
-        bottomBar = {// باتن نویگیشن در پایین
+
+
+        bottomBar = {
+
             BottomNavBar(
                 navController = navController,
                 currentRoute = currentRoute
-            )},
+            )
+        }
 
     ) { innerPadding ->
+
+
         Column(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
         ) {
-            if (!showFullSearch) {
-                FilterSection { selected ->
-                    // بعداً فیلتر واقعی اعمال میشه
-                    println("فیلتر اعمال شد: $selected")
-                }
 
+
+            // Filter Section
+            if (!showFullSearch) {
+
+                FilterSection { selected ->
+
+                    println(
+                        "فیلتر اعمال شد: $selected"
+                    )
+                }
             }
 
 
-
-
-
-
-            // سرچ تمام صفحه
+            // Full Screen Search
             AnimatedVisibility(
+
                 visible = showFullSearch,
-                enter = fadeIn(tween(300)) + slideInVertically(tween(300)) { -it },
-                exit = fadeOut(tween(300)) + slideOutVertically(tween(300)) { -it }
+
+                enter =
+                    fadeIn(tween(300)) +
+                            slideInVertically(tween(300)) {
+                                -it
+                            },
+
+                exit =
+                    fadeOut(tween(300)) +
+                            slideOutVertically(tween(300)) {
+                                -it
+                            }
+
             ) {
+
                 FullScreenSearch(
-                    onDismiss = { showFullSearch = false },
-                    onSearch = { /* بعداً */ }
+
+                    onDismiss = {
+                        showFullSearch = false
+                    },
+
+                    onSearch = {
+                        // بعداً منطق سرچ اضافه می‌شود
+                    }
                 )
             }
 
 
+            // Product List
             LazyColumn(
                 modifier = Modifier.fillMaxSize()
             ) {
-                grouped.forEach { (categoryName, productPairs) ->
-                    // header
+
+
+                grouped.forEach {
+
+                        (categoryName, productPairs) ->
+
+
+                    // Category Title
                     item {
+
                         Text(
+
                             text = categoryName,
+
                             fontWeight = FontWeight.Bold,
+
                             fontSize = 20.sp,
-                            modifier = Modifier.padding(start = 16.dp, top = 12.dp, bottom = 8.dp)
+
+                            modifier = Modifier.padding(
+
+                                start = 16.dp,
+
+                                top = 12.dp,
+
+                                bottom = 8.dp
+                            )
                         )
                     }
 
-                    // horizontal row of up to 2 items
+
+                    // Products Row
                     item {
+
                         LazyRow(
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            modifier = Modifier.padding(start = 12.dp, bottom = 12.dp)
+
+                            horizontalArrangement =
+                                Arrangement.spacedBy(12.dp),
+
+                            modifier = Modifier.padding(
+
+                                start = 12.dp,
+
+                                bottom = 12.dp
+                            )
+
                         ) {
-                            // take first 2 products for this category
-                            items(productPairs.take(2)) { pair ->
+
+
+                            // فعلاً فقط دو محصول اول
+                            items(
+                                productPairs.take(2)
+                            ) { pair ->
+
+
                                 val (product, id) = pair
-                                // Wrap original ProductItem (which must remain unchanged) inside a clickable Box
+
+
                                 Column(
+
                                     modifier = Modifier
+
                                         .width(160.dp)
+
                                         .clickable {
-                                            // navigate to detail screen with id
-                                            navController.navigate("productDetail/${id}")
+
+                                            navController.navigate(
+                                                "productDetail/$id"
+                                            )
                                         }
+
                                 ) {
-                                    // reuse your existing ProductItem composable by calling it here
-                                    ProductItem(product)
+
+                                    ProductItem(
+                                        product = product
+                                    )
                                 }
                             }
                         }
                     }
                 }
 
-                // If no categories (empty db), you can fallback to showing original hardcoded grid
+
+                // اگر محصولی وجود نداشت
                 if (grouped.isEmpty()) {
+
                     item {
-                        // keep original grid look by reusing ProductGrid on the original hardcoded list
-                        // If you have a hardcoded sample list defined elsewhere, call it; otherwise show nothing
-                        Spacer(modifier = Modifier.height(24.dp))
+
+                        Spacer(
+                            modifier =
+                                Modifier.height(24.dp)
+                        )
+
+
                         Text(
-                            text = "No products yet. Try restarting the app or check initial data.",
-                            modifier = Modifier.padding(16.dp)
+
+                            text =
+                                "No products available",
+
+                            modifier =
+                                Modifier.padding(16.dp)
                         )
                     }
                 }
             }
-
-
         }
     }
 }
+
+
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -242,6 +349,8 @@ fun RoboticsTopBar(
         }
     )
 }
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -309,7 +418,6 @@ fun FullScreenSearch(
         }
     }
 }
-
 
 
 
@@ -413,7 +521,7 @@ fun ProductGrid(products: List<Product>) {
 fun ProductItem(product: Product) {
     Column {
         AsyncImage(
-            model = product.image,
+            model = product.imagePath,
             contentDescription = product.title,
             contentScale = ContentScale.Crop,
             modifier = Modifier
@@ -427,12 +535,6 @@ fun ProductItem(product: Product) {
     }
 }
 
-data class Product(
-    val title: String,
-    val subtitle: String,
-    val price: String,
-    val image: Int
-)
 
 
 
@@ -545,4 +647,5 @@ fun startQrScanner(context: Context) {
 //        }
 //    )
 //}
+
 

@@ -73,9 +73,9 @@ fun InvoiceScreen(
     // load when trackingCode changes
     LaunchedEffect(trackingCode) {
         orderViewModel.loadOrderByCode(trackingCode)
-        val (u, p) = prefs.getUser()
-        savedEmail = u
-        savedPass = p
+//        val (u, p) = prefs.getUser()
+//        savedEmail = u
+//        savedPass = p
     }
 
 
@@ -263,7 +263,7 @@ fun InvoiceScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     AsyncImage(
-                        model = product.image,
+                        model = product.imagePath,
                         contentDescription = null,
                         modifier = Modifier
                             .size(64.dp)

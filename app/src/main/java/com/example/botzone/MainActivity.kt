@@ -1,5 +1,6 @@
 package com.example.botzone
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -16,8 +17,12 @@ import androidx.navigation.navArgument
 import com.example.botzone.Conferences.ConferenceDetailsScreen
 import com.example.botzone.Conferences.ConferenceRegistrationScreen
 import com.example.botzone.Conferences.PaymentScreen
-import com.example.botzone.Conferences.RegistrationConfirmedPopup
 import com.example.botzone.Conferences.RoboticsConferencesScreen
+import com.example.botzone.Fake.FakeOrderViewModel
+import com.example.botzone.Login.AuthRepository
+import com.example.botzone.Login.LoginScreen
+import com.example.botzone.Login.LoginViewModel
+import com.example.botzone.Login.UserPreferences
 import com.example.botzone.Products.InvoiceScreen
 import com.example.botzone.Products.ProductDetailScreen
 import com.example.botzone.Products.PurchaseCompleteScreen
@@ -32,13 +37,14 @@ import com.example.botzone.Room.Conferences.ConferenceViewModelFactory
 import com.example.botzone.Room.Order.OrderRepository
 import com.example.botzone.Room.Order.OrderViewModel
 import com.example.botzone.Room.Order.OrderViewModelFactory
-import com.example.botzone.Room.Payment.PaymentEntity
 import com.example.botzone.Room.Payment.PaymentRepository
 import com.example.botzone.Room.Payment.PaymentViewModel
 import com.example.botzone.Room.Payment.PaymentViewModelFactory
 import com.example.botzone.Room.Registration.RegistrationRepository
 import com.example.botzone.Room.Registration.RegistrationViewModel
 import com.example.botzone.Room.Registration.RegistrationViewModelFactory
+import com.example.botzone.SplashScreen.SplashScreen
+import com.example.botzone.SplashScreen.SplashViewModel
 import com.example.botzone.ui.theme.BotZoneTheme
 
 class MainActivity : FragmentActivity() {
@@ -53,6 +59,7 @@ class MainActivity : FragmentActivity() {
     }
 }
 
+@SuppressLint("ViewModelConstructorInComposable")
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
@@ -64,6 +71,7 @@ fun AppNavigation() {
     val factory = OrderViewModelFactory(orderRepository)
     val orderViewModel: OrderViewModel = viewModel(factory = factory)
     val cartViewModel: CartViewModel = viewModel()
+    val Fakeviewmodel: FakeOrderViewModel = viewModel()
     val repository = ConferenceRepository(db.conferenceDao())
     val conferenceFactory = ConferenceViewModelFactory(repository)
     val conferenceViewModel: ConferenceViewModel = viewModel(factory = conferenceFactory)
@@ -73,14 +81,38 @@ fun AppNavigation() {
     val paymentRepository = PaymentRepository(db.paymentDao())
     val paymentFactory = PaymentViewModelFactory(paymentRepository)
     val paymentViewModel : PaymentViewModel = viewModel(factory = paymentFactory)
+    val repo = AuthRepository()
+    val prefs = UserPreferences(context)
+    val loginViewModel = LoginViewModel(repo,prefs)
+    val splashViewModel = SplashViewModel(prefs)
 
     NavHost(
         navController = navController,
-        startDestination = "login"
+        startDestination = "splash"
     ) {
+
+        // صفحه plash screen
+        composable("splash") {
+            SplashScreen(
+                onNavigateToLogin = {
+                    navController.navigate("login") {
+                        popUpTo("splash") { inclusive = true }
+                    }
+                },
+                onNavigateToHome = {
+                    navController.navigate("Robotics") {
+                        popUpTo("splash") { inclusive = true }
+                    }
+                },
+                viewModel = splashViewModel
+            )
+        }
+        
+        
         // 🔹 صفحه لاگین
         composable("login") {
-            LoginScreen(navController = navController)
+            LoginScreen(navController = navController
+            , viewModel = loginViewModel)
         }
 
         // 🔹 صفحه فروشگاه
@@ -88,6 +120,7 @@ fun AppNavigation() {
         composable("Robotics") {
             RoboticsStoreScreen(
                 navController = navController,
+//                viewModel = Fakeviewmodel,
                 cartViewModel = cartViewModel
             )
         }

@@ -15,3 +15,11 @@ data class LoginResponse(
     val token: String?,
     val username: String?
 )
+
+
+
+data class LoginState(
+    val loading: Boolean = false,
+    val error: String? = null,
+    val success: Boolean = false
+)

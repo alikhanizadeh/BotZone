@@ -1,5 +1,6 @@
-package com.example.botzone
+package com.example.botzone.Login
 
+import android.provider.Settings
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -30,7 +31,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.botzone.Login.UserPreferences
+import com.example.botzone.MainActivity
+import com.example.botzone.R
 import com.example.botzone.authentication.authenticateUser
 import kotlinx.coroutines.launch
 
@@ -40,12 +42,22 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
+    viewModel: LoginViewModel,
     navController: NavController,
 ) {
 
     val context = LocalContext.current
+    val deviceId = DeviceUtils.getDeviceId(context)
+//    val scope = rememberCoroutineScope()
+//    val prefs = remember { UserPreferences(context) }
+
+    val state by viewModel.state.collectAsState()
+    var showPassword by remember { mutableStateOf(false) }
+    var username = viewModel.username.collectAsState().value
+    var password = viewModel.password.collectAsState().value
     val scope = rememberCoroutineScope()
-    val prefs = remember { UserPreferences(context) }
+
+
 
 
 
@@ -59,53 +71,21 @@ fun LoginScreen(
     val fieldBackground =
         if (isDark) Color(0xFF1F2937) else Color(0xFFF3F4F6)
 
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var savedEmail by remember { mutableStateOf<String?>(null) }
-    var savedPass by remember { mutableStateOf<String?>(null) }
-    var isLoggedIn by remember { mutableStateOf(false) }
-    var showPassword by remember { mutableStateOf(false) }
 
-
-    LaunchedEffect(Unit) {
-        prefs.clearUser()
-        val (u, p) = prefs.getUser()
-        savedEmail = u
-        savedPass = p
-        isLoggedIn = prefs.isLoggedIn()
-
-
-        if (isLoggedIn && !u.isNullOrEmpty()) {
-            // مستقیماً وارد اپ شو
-            Toast.makeText(context, "Welcome back, $u!", Toast.LENGTH_SHORT).show()
-            navController.navigate("Robotics") {
-                popUpTo("login") { inclusive = true }
-            }
-        }
-    }
-
-
-    // اگر قبلاً لاگین کرده، احراز هویت بیومتریک انجام بده
-    if (isLoggedIn) {
+    if (state.success) {
         LaunchedEffect(Unit) {
-            val activity = context as MainActivity
-            authenticateUser(
-                activity = activity,
-                onSuccess = {
-                    Toast.makeText(context, "Welcome back, $email!", Toast.LENGTH_SHORT).show()
-                    navController.navigate("Robotics") {
-                        popUpTo("login") { inclusive = true } // حذف صفحه لاگین از استک
-                    }
-                },
-                onError = { error ->
-                    Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
-                }
-            )
+    navController.navigate("Robotics") {
+        popUpTo("login") { inclusive = true } // حذف صفحه لاگین از استک
+    }
         }
     }
 
 
-    if (!isLoggedIn) {
+
+
+
+
+
 
         Scaffold(
             containerColor = backgroundColor
@@ -119,7 +99,6 @@ fun LoginScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                // --- Logo ---
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -188,8 +167,8 @@ fun LoginScreen(
                     )
                     Spacer(Modifier.height(6.dp))
                     OutlinedTextField(
-                        value = email,
-                        onValueChange = { email = it },
+                        value = username,
+                        onValueChange = { viewModel.username.value = it },
                         placeholder = { Text("Enter your username or email") },
                         singleLine = true,
                         leadingIcon = {
@@ -229,7 +208,7 @@ fun LoginScreen(
                     }
                     OutlinedTextField(
                         value = password,
-                        onValueChange = { password = it },
+                        onValueChange = { viewModel.password.value = it  },
                         placeholder = { Text("Enter your password") },
                         singleLine = true,
                         leadingIcon = { Icon(Icons.Outlined.Lock, null) },
@@ -266,41 +245,45 @@ fun LoginScreen(
                 // --- Login Button ---
                 Button(
                     onClick = {
+
+                        viewModel.loginOrRegister(deviceId)
                         scope.launch {
-                            // اگر هنوز هیچ کاربر ذخیره نشده، یعنی اولین لاگین است
-                            if (savedEmail.isNullOrEmpty()) {
-                                if (email.isNotEmpty() && password.isNotEmpty()) {
-                                    prefs.saveUser(email, password)
-                                    prefs.setLoggedIn(true)
-                                    Toast.makeText(context, "Welcome, $email!", Toast.LENGTH_SHORT).show()
+                                if (username.isNotEmpty() && password.isNotEmpty()) {
+                                    Toast.makeText(context, "Welcome, $username!", Toast.LENGTH_SHORT).show()
                                     navController.navigate("Robotics") {
                                         popUpTo("login") { inclusive = true }
                                     }
                                 } else {
                                     Toast.makeText(context, "Please enter all fields", Toast.LENGTH_SHORT).show()
                                 }
-                            } else {
-                                // اگر از قبل کاربر ثبت‌شده، فقط با همون می‌تونه وارد بشه
-                                if (email == savedEmail && password == savedPass) {
-                                    prefs.setLoggedIn(true)
-                                    Toast.makeText(context, "Welcome back, $email!", Toast.LENGTH_SHORT).show()
-                                    navController.navigate("Robotics") {
-                                        popUpTo("login") { inclusive = true }
-                                    }
-                                } else {
-                                    Toast.makeText(context, "You are already logged in with another account.", Toast.LENGTH_LONG).show()
-                                }
-                            }
                         }
                     },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 24.dp)
                         .height(56.dp),
+                    enabled = !state.loading && username.isNotBlank() && password.isNotBlank(),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1193D4)),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Login", color = Color.White, fontSize = 18.sp)
+
+                    if (state.loading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = Color.White
+                        )
+                    } else {
+                        Text("Login", color = Color.White, fontSize = 18.sp)
+                    }
+                }
+
+                // نمایش خطا
+                if (state.error != null) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = state.error!!,
+                        color = MaterialTheme.colorScheme.error
+                    )
                 }
 
                 // --- Divider ---
@@ -370,13 +353,11 @@ fun LoginScreen(
     }
 
 
-}
-
 
 
 
 @Preview(showBackground = true)
 @Composable
 fun LoginScreenPreview() {
-        LoginScreen(rememberNavController())
+//        LoginScreen(rememberNavController())
 }

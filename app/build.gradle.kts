@@ -44,20 +44,24 @@ dependencies {
 
 
 
-    // ✅ Room Database (ORM برای ذخیره‌سازی محلی)
+    //  Room Database
     implementation ("androidx.room:room-runtime:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
     implementation ("androidx.room:room-ktx:2.6.1")
-
-//    implementation ("androidx.room:room-runtime:2.8.3")
-//    ksp("androidx.room:room-compiler:2.8.3")
-//    implementation ("androidx.room:room-ktx:2.8.3")
-
 
 
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
+    // Ktor Client
+    implementation("io.ktor:ktor-client-core:2.3.7")
+    implementation("io.ktor:ktor-client-cio:2.3.7")
+    implementation("io.ktor:ktor-client-content-negotiation:2.3.7")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
+
+    // Kotlinx Serialization
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
 
 
     implementation("com.google.code.gson:gson:2.13.2")
@@ -80,13 +84,14 @@ dependencies {
     // ✅ QRCode generator (برای ساخت QR در صفحه‌ی فاکتور)
     implementation("com.google.zxing:core:3.5.3")
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
-
+    implementation("com.airbnb.android:lottie-compose:6.6.7")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
     implementation("io.coil-kt.coil3:coil-compose:3.2.0")
+    implementation("io.coil-kt:coil-compose:2.5.0")
     implementation(libs.androidx.ui.graphics)
     implementation("androidx.biometric:biometric:1.4.0-alpha03")
     implementation("androidx.datastore:datastore-preferences:1.1.7")

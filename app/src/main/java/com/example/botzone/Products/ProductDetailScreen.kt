@@ -1,6 +1,7 @@
 package com.example.botzone.Products
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,6 +24,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavController
 import coil3.compose.AsyncImage
 import com.example.botzone.Room.Cart.CartViewModel
@@ -49,8 +51,8 @@ fun ProductDetailScreen(
             return@LaunchedEffect
         }
         scope.launch {
-            val p = viewModel.getProductById(productId)
-            product = p
+//            val p = viewModel.getProductById(productId,{})
+            product = product
             loading = false
         }
     }
@@ -142,7 +144,7 @@ fun ProductDetailScreen(
                     ) {
                         // عکس
                         AsyncImage(
-                            model = product!!.image,
+                            model = product!!.imagePath,
                             contentDescription = product!!.title,
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop

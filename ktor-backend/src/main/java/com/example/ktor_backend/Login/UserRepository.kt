@@ -1,11 +1,14 @@
-package com.example.ktor_backend.database
+package com.example.ktor_backend.Login
 
 
 
-import com.example.ktor_backend.models.User
 import java.sql.Connection
 import java.sql.DriverManager
 import java.time.LocalDateTime
+
+// 1.اضافه کردن کاربر جدید
+// 2.پیدا کردن کاربر از روی username
+// 3.چک کردن Device Binding
 
 class UserRepository {
     private val connection: Connection

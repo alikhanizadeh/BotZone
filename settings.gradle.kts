@@ -18,7 +18,6 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-
 rootProject.name = "BotZone"
 include(":app")
 include(":ktor-backend")

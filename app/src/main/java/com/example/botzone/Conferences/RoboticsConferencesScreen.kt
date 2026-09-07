@@ -41,6 +41,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import coil3.compose.AsyncImage
 import com.example.botzone.BottomNavBar.BottomNavBar
+import com.example.botzone.BottomNavBar.CustomBottomNavigation
 import com.example.botzone.Products.FullScreenSearch
 import com.example.botzone.Products.RoboticsTopBar
 import com.example.botzone.R
@@ -93,7 +94,8 @@ fun RoboticsConferencesScreen(
             BottomNavBar(
             navController = navController,
             currentRoute = currentRoute
-        )}
+        )
+        }
     ) { padding ->
         Column(
             modifier = Modifier
